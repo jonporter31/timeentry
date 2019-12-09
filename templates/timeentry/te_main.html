@@ -1,0 +1,214 @@
+{% extends "jppapp/base.html" %}
+
+{% block title %}__time entry__porter's server v2.0__{% endblock title %}
+
+{% comment %}default sidebar contents{% endcomment %}
+
+{% block appname %}Time Entry{% endblock appname %}
+
+{% block appbuttons %}
+<a href="/timeentry/reports/">Reports</a>
+<a href="/timeentry/addclient/">Clients</a>
+<a href="/timeentry/addmilestone/">Milestones</a>
+<a href="/timeentry/addhourtype/">Hour Types</a>
+{% endblock appbuttons %}
+
+{% block appcanvas %}
+
+	<div id="timeMain">
+		<div id="timeAdd">
+			{% if perms.timeentry.can_time %}
+			{% comment %}if the user is an admin/staff {% endcomment %}
+			<form action="/timeentry/add/" method="POST">
+				{% csrf_token %}
+				<div id="timeFields">
+				{{ addform.non_field_errors }}
+				{{ addform.errors }}
+					<table align="center">
+						<tr>
+							<td><label for="{{ addform.client_name.id_for_label }}">Client: </label></td>
+							<td></td>
+							<td><label for="{{ addform.milestone_name.id_for_label }}">Milestone: </label></td>
+							<td></td>
+							<td><label for="{{ addform.hours.id_for_label }}">Number of Hours: </label></td>
+							<td></td>
+							<td><label for="{{ addform.billable.id_for_label }}">Billable?: </label></td>
+							<td></td>
+							<td><label for="{{ addform.hour_type_desc.id_for_label }}">Type of Work: </label></td>
+						</tr>
+						{% comment %}
+						the errors are not showing
+						{% endcomment %}
+						<tr>
+							<td>
+							    {{ addform.client_id.errors }}
+							    <select name="client_id">
+							    <option value="-1">-----</option>
+								{% for key, value in clientlist.items %}
+								    <option value="{{ key }}">{{ value }}</option>
+								{% endfor %}
+								{% comment %}
+								use the below in the view processing the POST
+								def selectview(request):
+   item  = Item.objects.all() # use filter() when you have sth to filter ;)
+   form = request.POST # you seem to misinterpret the use of form from django and POST data. you should take a look at [Django with forms][1]
+   # you can remove the preview assignment (form =request.POST)
+   if request.method == 'POST':
+      selected_item = get_object_or_404(Item, pk=request.POST.get('item_id'))
+      # get the user you want (connect for example) in the var "user"
+      user.item = selected_item
+      user.save()
+
+      # Then, do a redirect for example
+
+   return render_to_response ('select/item.html', {'items':item}, context_instance =  RequestContext(request),)
+   								{% endcomment %}
+								</select>
+							</td>
+							<td style="color:#00ffff;">...</td>
+							<td>
+							    {{ addform.milestone_id.errors }}
+							    <select name="milestone_id">
+							    	<option value="-1">-----</option>
+							    	{% for key, value in milestonelist.items %}
+							    		<option value="{{ key }}">{{ value }}</option>
+							    	{% endfor %}
+							    </select>
+							</td>
+							<td style="color:#00ffff;">...</td>
+							<td>
+							    {{ addform.hours.errors }}
+							    {{ addform.hours }}
+							</td>
+							<td style="color:#00ffff;">...</td>
+							<td align="center">
+							    {{ addform.billable.errors }}
+							    {{ addform.billable }}
+							</td>
+							<td style="color:#00ffff;">...</td>
+							<td>
+								{{ addform.hour_type.errors }}
+								<select name="hour_type">
+									<option value="-1">-----</option>
+									{% for key, value in hourtypelist.items %}
+										<option value="{{ key }}">{{ value }}</option>
+									{% endfor %}
+								</select>
+							</td>
+							<td style="color:#00ffff;">...</td>
+							<td>
+								<input type="submit" value="Add" />
+							</td>
+						</tr>
+					</table>
+				</div>
+				
+				
+			</form>
+
+			{% else %}
+			{% comment %}if the user is not admin/stff {% endcomment %}
+			<div id="noAccess">
+				YOU DO NOT HAVE ACCESS TO THIS PAGE<br />Please contact an admin for support if you believe you have received this message in error
+			</div>
+
+			{% endif %}
+		</div>
+
+		<div id="timeExist">
+			{% if perms.timeentry.can_time %}
+			
+
+			<form action="/timeentry/save/" method="POST" name="editForm">
+			{% csrf_token %}
+			{{ configform.non_field_errors }}
+			{{ configform.errors }}
+
+			<table align="center">
+				<tr>
+					<th>Client</th>
+					<th style="color:#f2f2f2;">.........</th>
+					<th>Milestone</th>
+					<th style="color:#f2f2f2;">.........</th>
+					<th>Number of Hours</th>
+					<th style="color:#f2f2f2;">.........</th>
+					<th>Billable?</th>
+					<th style="color:#f2f2f2;">.........</th>
+					<th>Type of Work</th>
+					<th style="color:#f2f2f2;">.........</th>
+					<th colspan="3">Actions</th>
+				</tr>
+				{% for key, value in payload.items %}
+
+					<tr>
+
+						{% if key_key_key_key|add:"0" == value.entry_id|add:"0" %}
+						{% comment %} this is where the edit box version goes {% endcomment %}
+							{{ editform.entry_id.as_hidden }}
+							<td>{{ value.client_name }}</td>
+							<td style="color:#f2f2f2;">.........</td>
+							<td>{{ value.artist_name }}</td>
+							<td style="color:#f2f2f2;">.........</td>
+							<td>{{ editform.hours }}</td>
+							<td style="color:#f2f2f2;">.........</td>
+							<td>{{ editform.billable }}</td>
+							<td style="color:#f2f2f2;">.........</td>
+							<td>{{ editform.hour_type }}</td>
+							<td style="color:#f2f2f2;">.........</td>
+
+						{% else %}	
+						{% comment %} this is where the normal rows goes {% endcomment %}
+							<td>{{ value.client_name }}</td>
+							<td style="color:#f2f2f2;">.........</td>
+							<td>{{ value.artist_name }}</td>
+							<td style="color:#f2f2f2;">.........</td>
+							<td>{{ value.hours }}</td>
+							<td style="color:#f2f2f2;">.........</td>
+							<td>
+								{% if value.billable %}
+									Yes
+								{% else %}
+									No
+								{% endif %}
+							</td>
+							<td style="color:#f2f2f2;">.........</td>
+							<td>{{ value.hour_type_desc }}</td>
+							<td style="color:#f2f2f2;">.........</td>
+						{% endif %}
+
+						{% if value.entry_id|add:"0" == key_key_key_key_edt|add:"0" %}
+							<td><a href='javascript:document.configForm.submit();'><i class="fa fa-check" aria-hidden="true"></i></a></td> <td><a href="/timeentry/"><i class="fa fa-times" aria-hidden="true"></i></a></td>
+						{% else %}
+							<td colspan="2"><a href="/timeentry/edt/{{ value.entry_id }}/"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+						{% endif %}
+
+						{% if config.confirmdel == 'y' %}
+							{% if value.entry_id|add:"0" == key_key_key_key_del|add:"0" %}
+							<td><a href="/timeentry/del/{{ value.entry_id }}/"><i class="fa fa-check" aria-hidden="true"></i></a></td> <td><a href="/timeentry/"><i class="fa fa-times" aria-hidden="true"></i></a></td>
+							{% else %}
+							<td colspan="2"><a href="/timeentry/del/con/{{ value.entry_id }}/"><i class="fa fa-trash" aria-hidden="true"></i></a></td>
+							{% endif %}
+						{% else %}
+						<td><a href="/timeentry/del/{{ value.entry_id }}/"><i class="fa fa-trash" aria-hidden="true"></i></a></td>
+						{% endif %}
+					</tr>
+					
+				{% endfor %}
+			</table>
+
+			</form>
+
+			{% endif %}
+		</div>
+
+		
+
+	</div>
+
+
+
+{% endblock appcanvas %}
+
+{% block scripts %} 
+
+{% endblock scripts %}
